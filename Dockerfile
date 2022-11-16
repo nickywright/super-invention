@@ -8,11 +8,17 @@ RUN apt-get update \
      python3-pip \
      libnetcdf-dev \
      ghostscript \
-	 build-essential
+	 libgdal-dev \
+	 libgeos-dev \
+	 proj-data \
+	 python3-gdal \
+&& apt-get clean \
+&& rm -rf /var/lib/apt/lists/*
 
+# install Cython
+RUN pip3 install Cython	 
 
 # add user
-#EXPOSE 8888
 ENV NB_USER jovyan
 ENV NB_HOME /home/$NB_USER
 RUN useradd -m -s /bin/bash -N $NB_USER -g users \
@@ -24,24 +30,24 @@ VOLUME $NB_HOME/workspace
 USER $NB_USER
 WORKDIR $NB_HOME
 
+RUN pip3 install shapely --no-binary shapely
 RUN pip3 install pygmt \
            jupyterlab \
-		   geopandas \
 		   pandas \
-		   rioxarray \
 		   xarray \
-		   numpy \ 
+		   numpy \
 		   matplotlib \
-		   shapely \
-		   re \
 		   scipy \
-		   warnings \
-		   rasterio \
 		   datetime \
-		   multiprocessing \
+		   rasterio \
+		   geopandas \
+		   rioxarray \
 		   cartopy \
 		   PlateTectonicTools
 
+# This will copy things into the docker 
 COPY . $NB_HOME
 ENV PATH "/$NB_HOME/.local/bin:${PATH}"
+
+EXPOSE 8888
 CMD ["jupyter-lab", "--no-browser", "--ip=0.0.0.0"]
