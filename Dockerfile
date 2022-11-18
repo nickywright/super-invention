@@ -16,11 +16,18 @@ RUN apt-get update \
 && apt-get clean \
 && rm -rf /var/lib/apt/lists/*
 
-# install pygplates! This is the arm version, need to modify for the intel one though...
+# install pygplates! First copy both versions
 COPY pygplates_0.36.0_py310_ubuntu-22.04-arm64.deb /
-RUN apt-get update \ 
-    && apt install -y -f ./pygplates_0.36.0_py310_ubuntu-22.04-arm64.deb
+COPY pygplates_0.36.0_py310_ubuntu-22.04-amd64.deb /
 
+## Check the architecture, and install the correct pygplates. Not yet
+RUN arch=$(arch | sed s/aarch64/arm64/ | sed s/x86_64/amd64/) \
+	&& apt-get update \
+    && apt install -y -f ./pygplates_0.36.0_py310_ubuntu-22.04-$arch.deb
+
+RUN rm /pygplates_0.36.0_py310_ubuntu-22.04-*.deb
+
+# set pythonpath 
 ENV PYTHONPATH=$PYTHONPATH:/usr/lib
 # install Cython
 RUN pip3 install Cython	 
