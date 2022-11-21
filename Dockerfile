@@ -21,6 +21,8 @@ RUN apt-get update \
 	libgeos-dev \
 	proj-data \
 	python3-gdal \
+	gfortran \
+	ffmpeg \
 && apt-get clean \
 && rm -rf /var/lib/apt/lists/*
 
@@ -72,7 +74,11 @@ RUN pip3 install pygmt \
 		   rioxarray \ 
 		   cartopy \
 		   PlateTectonicTools \
-		   gplately
+		   gplately \
+		   stripy \
+		   moviepy \
+		   joblib \
+		   scikit-learn
 		   
 # to avoid a numpy error
 RUN pip3 install --upgrade numpy 
