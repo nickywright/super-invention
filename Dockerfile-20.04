@@ -22,6 +22,12 @@ RUN apt-get update \
     gmt-gshhg \
     gmt-dcw \
     gdal-bin \
+    software-properties-common \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+RUN add-apt-repository ppa:rmescandon/yq \
+    && apt update \
+    && apt install yq -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -98,10 +104,11 @@ RUN pip3 install --no-cache-dir shapely --no-binary shapely \
         moviepy \
         joblib \
         scikit-learn \
+        pyyaml \
     && pip3 install --no-cache-dir --upgrade numpy
 
 # This will copy things into the docker
-# COPY . $NB_HOME
+COPY *.ipynb $NB_HOME
 ENV PATH "/$NB_HOME/.local/bin:${PATH}"
 
 # ------ start command
