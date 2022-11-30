@@ -108,7 +108,9 @@ RUN pip3 install --no-cache-dir shapely --no-binary shapely \
     && pip3 install --no-cache-dir --upgrade numpy
 
 # This will copy things into the docker
-COPY *.ipynb $NB_HOME
+#tar -cvzf pygplates.tar.gz pygplates-course-2022
+ADD pygplates.tar.gz $NB_HOME
+# COPY pygplates-course-2022 $NB_HOME/pygplates-course-2022/
 ENV PATH "/$NB_HOME/.local/bin:${PATH}"
 
 # ------ start command
