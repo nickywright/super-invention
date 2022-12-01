@@ -71,6 +71,7 @@ RUN pip3 install --no-cache-dir Cython
 # add user
 ENV NB_USER jovyan
 ENV NB_HOME /home/$NB_USER
+ADD pygplates.tar.gz $NB_HOME
 RUN useradd -m -s /bin/bash -N $NB_USER -g users \
     &&  mkdir -p /$NB_HOME/workspace \
     &&  chown -R $NB_USER:users $NB_HOME
@@ -109,7 +110,6 @@ RUN pip3 install --no-cache-dir shapely --no-binary shapely \
 
 # This will copy things into the docker
 #tar -cvzf pygplates.tar.gz pygplates-course-2022
-ADD pygplates.tar.gz $NB_HOME
 # COPY pygplates-course-2022 $NB_HOME/pygplates-course-2022/
 ENV PATH "/$NB_HOME/.local/bin:${PATH}"
 
