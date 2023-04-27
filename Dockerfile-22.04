@@ -25,7 +25,7 @@ RUN apt-get update \
     wget \
     software-properties-common \
     && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* 
 
 # install GMT from source. Default GMT is otherwise too old (6.0.0)
 # GMT can be downloaded from here: https://github.com/GenericMappingTools/gmt/releases/tag/6.4.0
