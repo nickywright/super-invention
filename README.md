@@ -27,8 +27,8 @@ We need to do this on two machines: an arm64 (e.g. M1/M2 Macs) and an intel mach
 - Tag: `docker tag geodoc nickywright/geo-python:22.04-arm64` (on arm64) or `docker tag geodoc nickywright/geo-python:22.04-x86` (on x86)
 - Push to dockerhub: `docker push nickywright/geo-python:22.04-arm64` or `docker push nickywright/geo-python:22.04-x86`
 - Manifest step so that everything is under a single 'latest' tag:
-  - `docker manifest create nickywright/geo-python:latest \
---amend nickywright/geo-python:22.04-arm64 \
+  - `docker manifest create nickywright/geo-python:latest 
+--amend nickywright/geo-python:22.04-arm64 
 --amend nickywright/geo-python:22.04-x86`
   - `docker manifest push nickywright/geo-python:latest`
   
