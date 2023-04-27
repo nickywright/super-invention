@@ -1,9 +1,11 @@
 # ------ DockerFile for running various scripts and codes
+# This is specifically for DockerDesktop 2.2
 FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND noninteractive
 
-# setup environment
+# setup environment.
+# note: python3-rasterio seems to work better than the pip install rasterio=1.2.10...
 RUN apt-get update \
     && apt-get install -y --no-install-recommends python3-pip \
     libnetcdf-dev \
@@ -21,15 +23,17 @@ RUN apt-get update \
     gmt-gshhg \
     gmt-dcw \
     gdal-bin \
+    wget \
+    software-properties-common \
+    python3-rasterio \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 # install GMT from source. Default GMT is otherwise too old (6.0.0)
 # GMT can be downloaded from here: https://github.com/GenericMappingTools/gmt/releases/tag/6.4.0
-COPY gmt-6.4.0-src.tar.gz / 
-
-# build GMT. Also remove files and cmake/make after
-RUN tar xvf /gmt-6.4.0-src.tar.gz \
+# COPY gmt-6.4.0-src.tar.gz /
+RUN wget https://github.com/GenericMappingTools/gmt/releases/download/6.4.0/gmt-6.4.0-src.tar.gz -O ~/gmt-6.4.0-src.tar.gz  && \
+    tar xvf ~/gmt-6.4.0-src.tar.gz \
     && cp gmt-6.4.0/cmake/ConfigUserTemplate.cmake gmt-6.4.0/cmake/ConfigUser.cmake \
     && mkdir gmt-6.4.0/build \
     && cd gmt-6.4.0/build \
@@ -37,28 +41,36 @@ RUN tar xvf /gmt-6.4.0-src.tar.gz \
     && cmake --build . \
     && cmake --build . --target install \
     && cd ../.. \
-    && rm /gmt-6.4.0-src.tar.gz && rm -r /gmt-6.4.0 \
+    && rm ~/gmt-6.4.0-src.tar.gz && rm -r /gmt-6.4.0 \
     && apt remove cmake -y \
     && apt remove make -y
 
 # install pygplates!
 # Copy both amd64 and arm64 versions, and then check which one we need
 # PyGPlates can be downloaded from here: https://www.earthbyte.org/download-pygplates-0-36/
-COPY pygplates_*-22.04-*.deb /
+COPY pygplates_0.36.0_py310_ubuntu-22.04-*64.deb /
 
 ## Check the architecture, and install the correct pygplates
 RUN arch=$(arch | sed s/aarch64/arm64/ | sed s/x86_64/amd64/) \
     && apt-get update \
-    && apt install -y -f ./pygplates_0.36.0_py310_ubuntu-22.04-$arch.deb\
+    && apt install -y -f ./pygplates_0.36.0_py310_ubuntu-22.04-$arch.deb \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
-    && rm /pygplates_*.deb
+    && rm /pygplates_0.36.0_py310_ubuntu-22.04-*.deb
+
 
 # set pythonpath
 ENV PYTHONPATH=$PYTHONPATH:/usr/lib
 
-# install Cython
-RUN pip3 install --no-cache-dir Cython	 
+# install Cython as root, and also set python = python3
+RUN pip3 install --no-cache-dir Cython \
+    && cd "$(dirname $(which python3))" \
+    && ln -s idle3 idle \
+    && ln -s pydoc3 pydoc \
+    && ln -s python3 python \
+    && ln -s python3-config python-config \
+    && echo alias ls="'"'ls --color=auto'"'" >>  /etc/profile \
+	    && echo "PS1='${debian_chroot:+($debian_chroot)}\[\033[01;31m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '" >> /etc/profile
 
 # ------
 # add user
@@ -75,8 +87,11 @@ WORKDIR $NB_HOME
 
 # ------
 # install various python packages
+# rasterio==1.2.10, because 1.3+ requires a newer version of GDAL
+# need to upgrade numpy, because otherwise some packages complain
 # --no-cache-dir (and doing it all in one RUN command) is my attempt to try and reduce the image size
 RUN pip3 install --no-cache-dir shapely --no-binary shapely \
+    && pip3 install pygeos --no-binary pygeos \
     && pip3 install --no-cache-dir pygmt \
         jupyterlab \
         pandas \
@@ -85,7 +100,7 @@ RUN pip3 install --no-cache-dir shapely --no-binary shapely \
         matplotlib \
         scipy \
         datetime \
-        rasterio \
+        fiona \
         geopandas \
         rioxarray \
         cartopy \
@@ -95,11 +110,16 @@ RUN pip3 install --no-cache-dir shapely --no-binary shapely \
         moviepy \
         joblib \
         scikit-learn \
-        pyyaml
-
-# This will copy things into the docker 
-COPY . $NB_HOME
+        pyyaml \
+        pybacktrack \
+        rtree \
+        cmocean \
+    && pip3 install --no-cache-dir --upgrade numpy
+	
 ENV PATH "/$NB_HOME/.local/bin:${PATH}"
-
+# SHELL ["/bin/bash", "-l", "-c"]
+ENV SHELL /bin/bash
+	
+# ------ start command
 EXPOSE 8888
 CMD ["jupyter-lab", "--no-browser", "--ip=0.0.0.0"]
