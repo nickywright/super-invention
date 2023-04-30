@@ -6,9 +6,11 @@ Dockerfile(s) for running various pygplates and geosciency codes
 - [Dockerfile-22.10](https://github.com/nickywright/super-invention/blob/main/Dockerfile-22.10): does **not** include pygplates
 
 ## How-to
-For systems that can only use an older version of Docker Desktop, you can download the **20.04** image from: https://hub.docker.com/repository/docker/nickywright/geo-docker
-e.g. 
-`docker pull nickywright/geo-docker`
+- `docker pull nickywright/geo-python`: this will download the docker container image created using **[Dockerfile-22.04](https://github.com/nickywright/super-invention/blob/main/Dockerfile-22.04)**
+- For systems that can only use an older version of Docker Desktop (~2.2), use the **[Dockerfile-20.04](https://github.com/nickywright/super-invention/blob/main/Dockerfile-20.04)** image using `docker pull nickywright/geo-docker`
+
+
+
 
 
 ## Build instructions
