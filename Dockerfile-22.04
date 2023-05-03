@@ -1,5 +1,4 @@
 # ------ DockerFile for running various scripts and codes
-# This is specifically for DockerDesktop 2.2
 FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND noninteractive
@@ -27,7 +26,7 @@ RUN apt-get update \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* 
 
-# install GMT from source. Default GMT is otherwise too old (6.0.0)
+# install GMT from source
 # GMT can be downloaded from here: https://github.com/GenericMappingTools/gmt/releases/tag/6.4.0
 # COPY gmt-6.4.0-src.tar.gz /
 RUN wget https://github.com/GenericMappingTools/gmt/releases/download/6.4.0/gmt-6.4.0-src.tar.gz -O ~/gmt-6.4.0-src.tar.gz  && \
@@ -100,8 +99,6 @@ RUN pip3 install --no-cache-dir shapely \
         rioxarray \
         cartopy \
         PlateTectonicTools \
-        gplately \
-        stripy \
         moviepy \
         joblib \
         scikit-learn \
@@ -109,7 +106,8 @@ RUN pip3 install --no-cache-dir shapely \
         pybacktrack \
         rtree \
         cmocean \
-    && pip3 install --no-cache-dir --upgrade numpy
+    && pip3 install --no-cache-dir --upgrade numpy \
+    && pip3 install --no-cache-dir stripy gplately --no-binary=stripy
 	
 ENV PATH "/$NB_HOME/.local/bin:${PATH}"
 # SHELL ["/bin/bash", "-l", "-c"]
